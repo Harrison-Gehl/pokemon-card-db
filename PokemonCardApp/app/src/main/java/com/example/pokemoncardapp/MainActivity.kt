@@ -1,38 +1,48 @@
 package com.example.pokemoncardapp
 
-import android.content.Intent
 import android.os.Bundle
+import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.BottomAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ExperimentalComposeApi
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -46,6 +56,9 @@ import com.example.pokemoncardapp.ui.theme.PokemonCardAppTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+
         setContent {
             PokemonCardAppTheme {
                 // A surface container using the 'background' color from the theme
@@ -143,6 +156,7 @@ fun MainTextStyles(title: String){
         fontSize = 24.sp,
         fontWeight = FontWeight.Bold
         )
+
 }
 
 @Composable
@@ -152,6 +166,7 @@ fun <PaddingValues> ScrollContent(innerPadding: PaddingValues) {
 
 @Composable
 fun SearchCard(modifier: Modifier = Modifier) {
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -159,8 +174,11 @@ fun SearchCard(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         MainTextStyles(title = "Search from your Collection")
-    }
+        val searchTypeArr = arrayOf("Card Number", "Pokemon Name", "Series", "Holo")
+        val test =  ExposedDropDownMenu(searchTypeArr)
 
+
+    }
 }
 
 @Composable
@@ -172,6 +190,76 @@ fun AddCard(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         MainTextStyles(title = "Add a card to your collection")
+    }
+
+}
+
+@Composable
+fun TextFieldComp(searchType: String){
+    var text by remember { mutableStateOf("")}
+
+    OutlinedTextField(
+        value = text,
+        onValueChange = { text = it },
+        label = { Text(searchType) },
+        singleLine = true
+    )
+    SubmitButton(searchType, text)
+}
+
+@Composable
+fun SubmitButton(searchType : String, searchValue: String) {
+    Button(onClick = {
+        //wow
+    }) {
+        Text("Search")
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ExposedDropDownMenu(arr: Array<String>){
+    // MUI3 exposed drop down menu
+    // https://alexzh.com/jetpack-compose-dropdownmenu/
+
+    var expanded by remember {mutableStateOf(false)}
+    var selectedText by remember { mutableStateOf(arr[0]) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(32.dp)
+    ) {
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = {
+                expanded = !expanded
+            }
+        ) {
+            TextField(
+                value = selectedText,
+                onValueChange = {},
+                readOnly = true,
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                modifier = Modifier.menuAnchor()
+            )
+
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                arr.forEach { item ->
+                    DropdownMenuItem(
+                        text = { Text(text = item) },
+                        onClick = {
+                            selectedText = item
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+        TextFieldComp(selectedText)
     }
 
 }
